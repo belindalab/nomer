@@ -271,10 +271,11 @@
             // Для Telegram WebApp - дополнительная обработка
             container.querySelectorAll('.btn-call').forEach(link => {
                 link.addEventListener('click', function(e) {
-                    // Если в Telegram, пробуем использовать tg.openLink
+                    const href = this.getAttribute('href');
+                    
+                    // Если в Telegram, используем tg.openLink
                     if (tg && tg.openLink) {
                         e.preventDefault();
-                        const href = this.getAttribute('href');
                         try {
                             tg.openLink(href);
                         } catch(err) {
