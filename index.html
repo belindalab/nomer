@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Номера сотрудников</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+            background: #f5f5f5;
+            min-height: 100vh;
+            padding: 0;
+            color: #424B52;
+        }
+
+        .header {
+            width: 100%;
+            padding: 16px;
+            background: white;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .header-title {
+            flex: 1;
+            text-align: center;
+        }
+
+        .logo {
+            height: 32px;
+            width: auto;
+        }
+
+        h1 {
+            font-size: 22px;
+            font-weight: 600;
+            color: #424B52;
+            letter-spacing: -0.3px;
+            margin: 0;
+        }
+
+        .search-container {
+            width: 100%;
+            padding: 12px 16px;
+            background: white;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            position: sticky;
+            top: 64px;
+            z-index: 99;
+        }
+
+        .search-box {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            background: #f9f9f9;
+            font-size: 14px;
+            color: #424B52;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .search-box:focus {
+            background: white;
+            border-color: #DF3B20;
+            box-shadow: 0 0 0 3px rgba(223, 59, 32, 0.1);
+        }
+
+        .search-box::placeholder {
+            color: #999;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 8px 16px 20px;
+        }
+
+        .list-item {
+            background: white;
+            margin-bottom: 8px;
+            padding: 14px 16px;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+            transition: all 0.25s ease;
+            animation: slideIn 0.4s ease forwards;
+            opacity: 0;
+            transform: translateY(8px);
+            position: relative;
+        }
+
+        .list-item.hidden {
+            display: none;
+        }
+
+        @keyframes slideIn {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .item-main {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+
+        .item-name {
+            font-size: 16px;
+            font-weight: 600;
+            color: #424B52;
+            letter-spacing: -0.2px;
+            flex: 1;
+            line-height: 1.3;
+        }
+
+        .item-info-compact {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-top: 8px;
+            font-size: 12px;
+            color: #888;
+        }
+
+        .item-info-compact span {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .item-info-compact .info-dot {
+            width: 4px;
+            height: 4px;
+            background: #ccc;
+            border-radius: 50%;
+        }
+
+        .btn-call {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            background: #DF3B20;
+            color: white;
+            border-radius: 10px;
+            text-decoration: none;
+            transition: all 0.25s ease;
+            flex-shrink: 0;
+            box-shadow: 0 2px 6px rgba(223, 59, 32, 0.2);
+        }
+
+        .btn-call:active {
+            transform: scale(0.95);
+            box-shadow: 0 1px 3px rgba(223, 59, 32, 0.3);
+        }
+
+        .btn-call svg {
+            width: 18px;
+            height: 18px;
+            fill: white;
+        }
+
+
+        .loader {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 100px 20px;
+            color: #424B52;
+        }
+
+        .spinner {
+            width: 44px;
+            height: 44px;
+            border: 3.5px solid rgba(233, 236, 239, 0.8);
+            border-top-color: #DF3B20;
+            border-radius: 50%;
+            animation: spin 0.85s cubic-bezier(0.5, 0, 0.5, 1) infinite;
+            margin-bottom: 20px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .loader-text {
+            font-size: 15px;
+            color: #6c757d;
+            font-weight: 400;
+            letter-spacing: 0.2px;
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 100px 20px;
+            color: #adb5bd;
+            font-size: 15px;
+            display: none;
+            font-weight: 400;
+        }
+
+        .no-results.show {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @media (max-width: 480px) {
+            .header {
+                padding: 14px 12px;
+            }
+
+            .header-content {
+                gap: 10px;
+            }
+
+            .header-title {
+                padding-right: 0;
+            }
+
+            .logo {
+                height: 28px;
+            }
+
+            h1 {
+                font-size: 20px;
+            }
+
+            .search-container {
+                top: 60px;
+            }
+
+            .container {
+                padding: 8px 12px 20px;
+            }
+
+            .list-item {
+                padding: 12px 14px;
+            }
+
+            .item-name {
+                font-size: 15px;
+            }
+
+            .item-info-compact {
+                font-size: 11px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-content">
+            <img src="https://belinda.tj/img/main-logo.svg" alt="Logo" class="logo">
+            <div class="header-title">
+                <h1>Номера сотрудников</h1>
+            </div>
+        </div>
+    </div>
+
+    <div class="search-container">
+        <input type="text" id="search-input" class="search-box" placeholder="Поиск...">
+    </div>
+
+    <div id="loader" class="loader">
+        <div class="spinner"></div>
+        <div class="loader-text">Загрузка...</div>
+    </div>
+
+    <div class="no-results" id="no-results">
+        Ничего не найдено
+    </div>
+
+    <div class="container" id="employee-list"></div>
+
+    <script>
+        // ВСТАВЬТЕ ВАШ НОВЫЙ URL ТУТ
+        const apiUrl = "https://script.google.com/macros/s/AKfycbzixlhQe-pkXthvebpZBBForgsICB05v_3inXbMmDav-fc85x2zKtUbnIILeUJKH167/exec";
+        
+        let allEmployees = [];
+
+        function filterEmployees(searchTerm) {
+            const container = document.getElementById('employee-list');
+            const noResults = document.getElementById('no-results');
+            const term = (searchTerm || '').toLowerCase().trim();
+            let visibleCount = 0;
+
+            if (!term) {
+                // Если поиск пустой, показать все элементы
+                container.querySelectorAll('.list-item').forEach(item => {
+                    item.classList.remove('hidden');
+                });
+                noResults.classList.remove('show');
+                return;
+            }
+
+            allEmployees.forEach((emp, index) => {
+                const item = container.children[index];
+                if (!item) return;
+
+                const nameMatch = emp.name && emp.name.toLowerCase().includes(term);
+                const regionMatch = emp.region && emp.region.toLowerCase().includes(term);
+                const groupMatch = emp.group && emp.group.toLowerCase().includes(term);
+                const phoneMatch = emp.phone && emp.phone.toString().includes(term);
+
+                const matches = nameMatch || regionMatch || groupMatch || phoneMatch;
+
+                if (matches) {
+                    item.classList.remove('hidden');
+                    visibleCount++;
+                } else {
+                    item.classList.add('hidden');
+                }
+            });
+
+            if (visibleCount === 0 && term) {
+                noResults.classList.add('show');
+            } else {
+                noResults.classList.remove('show');
+            }
+        }
+
+        function createListItem(emp, index) {
+            const item = document.createElement('div');
+            item.className = 'list-item';
+            item.style.animationDelay = `${index * 0.02}s`;
+            
+            const infoItems = [];
+            if (emp.region) {
+                infoItems.push(`<span>${emp.region}</span>`);
+            }
+            if (emp.group) {
+                infoItems.push(`<span>${emp.group}</span>`);
+            }
+            if (emp.phone) {
+                infoItems.push(`<span>${emp.phone}</span>`);
+            }
+
+            const callButton = emp.phone ? `
+                <a href="tel:${emp.phone}" class="btn-call">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M20.01 15.38c-1.23 0-2.42-.2-3.53-.56-.35-.12-.74-.03-1.01.24l-1.57 1.97c-2.83-1.35-5.48-3.9-6.89-6.83l1.95-1.66c.27-.28.35-.67.24-1.02-.37-1.11-.56-2.3-.56-3.53 0-.54-.45-.99-.99-.99H4.19C3.65 3 3 3.24 3 3.99 3 13.28 10.73 21 20.01 21c.71 0 .99-.63.99-1.18v-3.45c0-.54-.45-.99-.99-.99z"/>
+                    </svg>
+                </a>
+            ` : '';
+
+            item.innerHTML = `
+                <div class="item-main">
+                    <div style="flex: 1;">
+                        <div class="item-name">${emp.name || 'Без имени'}</div>
+                        ${infoItems.length > 0 ? `
+                            <div class="item-info-compact">
+                                ${infoItems.map((info, i) => `
+                                    ${i > 0 ? '<span class="info-dot"></span>' : ''}
+                                    ${info}
+                                `).join('')}
+                            </div>
+                        ` : ''}
+                    </div>
+                    ${callButton}
+                </div>
+            `;
+            
+            return item;
+        }
+
+        fetch(apiUrl)
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('loader').style.display = 'none';
+                const container = document.getElementById('employee-list');
+                
+                allEmployees = data;
+                
+                data.forEach((emp, index) => {
+                    const item = createListItem(emp, index);
+                    container.appendChild(item);
+                });
+
+                // Поиск в реальном времени
+                const searchInput = document.getElementById('search-input');
+                searchInput.addEventListener('input', (e) => {
+                    filterEmployees(e.target.value);
+                });
+            })
+            .catch(err => {
+                document.getElementById('loader').innerHTML = `
+                    <div style="text-align: center; color: #DF3B20;">
+                        <div style="font-size: 40px; margin-bottom: 12px;">⚠</div>
+                        <div style="font-size: 15px; margin-bottom: 8px;">Ошибка загрузки</div>
+                        <div style="font-size: 13px; color: #999;">Проверьте подключение</div>
+                    </div>
+                `;
+                console.error(err);
+            });
+    </script>
+</body>
+</html>
