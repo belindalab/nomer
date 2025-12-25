@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Номера сотрудников</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
@@ -14,385 +14,199 @@
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: #f5f5f5;
-            min-height: 100vh;
-            padding: 0;
             color: #424B52;
+            padding-bottom: 20px;
         }
 
+        /* Шапка */
         .header {
             width: 100%;
-            padding: 20px 20px 18px;
+            padding: 15px 20px;
             background: white;
             border-bottom: 1px solid #e0e0e0;
             position: sticky;
             top: 0;
             z-index: 100;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-        }
-
-        .header-content {
             display: flex;
             align-items: center;
-            justify-content: space-between;
-            gap: 16px;
-            max-width: 900px;
-            margin: 0 auto;
+            gap: 15px;
         }
 
-        .logo {
-            height: 36px;
-            width: auto;
-        }
+        .logo { height: 30px; width: auto; }
+        h1 { font-size: 18px; font-weight: 700; flex: 1; }
 
-        h1 {
-            font-size: 24px;
-            font-weight: 700;
-            color: #424B52;
-            margin: 0;
-            flex: 1;
-            text-align: center;
-        }
-
+        /* Поиск */
         .search-container {
-            width: 100%;
-            padding: 20px;
+            padding: 15px 20px;
             background: white;
-            border-bottom: 1px solid #e0e0e0;
             position: sticky;
-            top: 74px;
+            top: 61px;
             z-index: 99;
+            border-bottom: 1px solid #e0e0e0;
         }
 
         .search-box {
             width: 100%;
-            max-width: 900px;
-            margin: 0 auto;
             padding: 12px 16px;
             border: 1px solid #e0e0e0;
-            border-radius: 8px;
+            border-radius: 10px;
             background: #f9f9f9;
-            font-size: 15px;
+            font-size: 16px;
             outline: none;
-            transition: all 0.3s ease;
         }
 
-        .search-box:focus {
-            border-color: #DF3B20;
-            background: white;
-            box-shadow: 0 0 0 3px rgba(223, 59, 32, 0.1);
-        }
+        .search-box:focus { border-color: #DF3B20; background: white; }
 
-        .container {
-            width: 100%;
-            max-width: 900px;
-            margin: 0 auto;
-            padding: 24px 20px 40px;
-        }
+        /* Список */
+        .container { padding: 15px; }
 
         .list-item {
             background: white;
-            margin-bottom: 12px;
-            padding: 18px 20px;
+            margin-bottom: 10px;
+            padding: 15px;
             border-radius: 12px;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
             display: flex;
             align-items: center;
             justify-content: space-between;
-            gap: 20px;
-            border: 1px solid #f0f0f0;
-            animation: slideInUp 0.4s ease forwards;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
         }
 
-        .list-item.hidden { display: none; }
+        .item-content { flex: 1; min-width: 0; padding-right: 10px; }
+        .item-name { font-size: 16px; font-weight: 700; margin-bottom: 4px; }
+        .item-info { font-size: 13px; color: #718096; display: flex; align-items: center; flex-wrap: wrap; gap: 5px; }
+        .dot { width: 3px; height: 3px; background: #ccc; border-radius: 50%; }
 
-        @keyframes slideInUp {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .item-content { flex: 1; min-width: 0; }
-
-        .item-name {
-            font-size: 18px;
-            font-weight: 700;
-            color: #424B52;
-            margin-bottom: 8px;
-        }
-
-        .item-info-compact {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            flex-wrap: wrap;
-            font-size: 14px;
-            color: #718096;
-        }
-
-        .info-dot {
-            width: 3px;
-            height: 3px;
-            background: #999;
-            border-radius: 50%;
-        }
-
+        /* Кнопка звонка */
         .btn-call {
+            width: 45px;
+            height: 45px;
+            background: #DF3B20;
+            border: none;
+            border-radius: 10px;
             display: flex;
             align-items: center;
             justify-content: center;
-            width: 48px;
-            height: 48px;
-            background: #DF3B20;
-            color: white;
-            border-radius: 12px;
-            box-shadow: 0 2px 6px rgba(223, 59, 32, 0.3);
             cursor: pointer;
-            border: none;
             flex-shrink: 0;
-            text-decoration: none;
-            -webkit-tap-highlight-color: rgba(223, 59, 32, 0.3);
+            transition: transform 0.1s ease;
         }
 
-        .btn-call:active { transform: scale(0.9); }
+        .btn-call:active { transform: scale(0.9); background: #c6341a; }
+        .btn-call svg { width: 22px; height: 22px; fill: white; }
 
-        .btn-call svg { width: 20px; height: 20px; fill: white; pointer-events: none; }
-
-        .loader { text-align: center; padding: 120px 20px; }
-        .spinner {
-            width: 40px; height: 40px;
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #DF3B20;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 20px;
+        /* Состояния */
+        .loader { text-align: center; padding: 50px; }
+        .spinner { 
+            width: 30px; height: 30px; border: 3px solid #f3f3f3; 
+            border-top: 3px solid #DF3B20; border-radius: 50%; 
+            animation: spin 1s linear infinite; margin: 0 auto 10px;
         }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-
-        .no-results { text-align: center; padding: 50px; display: none; color: #718096; }
-        .no-results.show { display: block; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .no-results { text-align: center; padding: 30px; display: none; color: #999; }
+        .hidden { display: none !important; }
     </style>
 </head>
 <body>
 
 <div class="header">
-    <div class="header-content">
-        <img src="https://belinda.tj/img/main-logo.svg" alt="Logo" class="logo">
-        <h1>Номера сотрудников</h1>
-    </div>
+    <img src="https://belinda.tj/img/main-logo.svg" alt="Logo" class="logo">
+    <h1>Контакты</h1>
 </div>
 
 <div class="search-container">
-    <input type="text" id="search-input" class="search-box" placeholder="🔍 Поиск сотрудников...">
+    <input type="text" id="search-input" class="search-box" placeholder="Поиск сотрудника...">
 </div>
 
 <div id="loader" class="loader">
     <div class="spinner"></div>
-    <p>Загрузка данных...</p>
+    <p>Загрузка...</p>
 </div>
 
 <div id="no-results" class="no-results">Ничего не найдено</div>
 <div class="container" id="employee-list"></div>
 
 <script>
-    // Безопасная инициализация Telegram WebApp (только если запущено в Telegram)
-    let tg = null;
-    let isTelegram = false;
-    try {
-        if (window.Telegram && window.Telegram.WebApp) {
-            tg = window.Telegram.WebApp;
-            // Проверяем, что мы действительно в Telegram
-            // В Telegram WebApp всегда есть platform или initDataUnsafe
-            if (tg.platform || (tg.initDataUnsafe && tg.initDataUnsafe.user)) {
-                isTelegram = true;
-                tg.ready();
-                tg.expand();
-            }
-        }
-    } catch(e) {
-        // Игнорируем ошибки, если не в Telegram
-    }
-    
-    // Дополнительная проверка по user agent (на случай если Telegram SDK не определился)
-    if (!isTelegram && /Telegram/i.test(navigator.userAgent)) {
-        isTelegram = true;
-    }
+    // Инициализация Telegram
+    const tg = window.Telegram.WebApp;
+    tg.ready();
+    tg.expand(); // Развернуть на весь экран
 
     const apiUrl = "https://script.google.com/macros/s/AKfycbzixlhQe-pkXthvebpZBBForgsICB05v_3inXbMmDav-fc85x2zKtUbnIILeUJKH167/exec";
     let allEmployees = [];
 
-    function createListItem(emp) {
-        const item = document.createElement('div');
-        item.className = 'list-item';
+    // ГЛАВНАЯ ФУНКЦИЯ ДЛЯ ЗВОНКА
+    function makeCall(phone) {
+        if (!phone) return;
+        // Очистка номера от лишних символов
+        const cleanPhone = phone.toString().replace(/[^\d+]/g, '');
         
-        const infoItems = [];
-        if (emp.region) infoItems.push(`<span>${emp.region}</span>`);
-        if (emp.group) infoItems.push(`<span>${emp.group}</span>`);
-        if (emp.phone) infoItems.push(`<span>${emp.phone}</span>`);
+        // В Telegram Mini Apps используем метод openLink для протокола tel:
+        try {
+            tg.openLink(`tel:${cleanPhone}`);
+        } catch (e) {
+            // Резервный метод для обычного браузера
+            window.location.href = `tel:${cleanPhone}`;
+        }
+    }
 
-        // Очищаем номер телефона и создаем ссылку
-        const phoneNumber = emp.phone ? emp.phone.toString().trim().replace(/[^\d+]/g, '') : '';
-        const callBtn = phoneNumber ? `
-            <a href="tel:${phoneNumber}" class="btn-call">
-                <svg viewBox="0 0 24 24"><path d="M20.01 15.38c-1.23 0-2.42-.2-3.53-.56-.35-.12-.74-.03-1.01.24l-1.57 1.97c-2.83-1.35-5.48-3.9-6.89-6.83l1.95-1.66c.27-.28.35-.67.24-1.02-.37-1.11-.56-2.3-.56-3.53 0-.54-.45-.99-.99-.99H4.19C3.65 3 3 3.24 3 3.99 3 13.28 10.73 21 20.01 21c.71 0 .99-.63.99-1.18v-3.45c0-.54-.45-.99-.99-.99z"/></svg>
-            </a>` : '';
+    function createCard(emp) {
+        const div = document.createElement('div');
+        div.className = 'list-item';
+        
+        const info = [];
+        if (emp.region) info.push(emp.region);
+        if (emp.group) info.push(emp.group);
+        if (emp.phone) info.push(emp.phone);
 
-        item.innerHTML = `
+        div.innerHTML = `
             <div class="item-content">
                 <div class="item-name">${emp.name || 'Без имени'}</div>
-                <div class="item-info-compact">
-                    ${infoItems.join('<span class="info-dot"></span>')}
+                <div class="item-info">
+                    ${info.map((text, i) => `${text}${i < info.length - 1 ? '<span class="dot"></span>' : ''}`).join('')}
                 </div>
             </div>
-            ${callBtn}
+            ${emp.phone ? `
+                <button class="btn-call" onclick="makeCall('${emp.phone}')">
+                    <svg viewBox="0 0 24 24"><path d="M20.01 15.38c-1.23 0-2.42-.2-3.53-.56-.35-.12-.74-.03-1.01.24l-1.57 1.97c-2.83-1.35-5.48-3.9-6.89-6.83l1.95-1.66c.27-.28.35-.67.24-1.02-.37-1.11-.56-2.3-.56-3.53 0-.54-.45-.99-.99-.99H4.19C3.65 3 3 3.24 3 3.99 3 13.28 10.73 21 20.01 21c.71 0 .99-.63.99-1.18v-3.45c0-.54-.45-.99-.99-.99z"/></svg>
+                </button>
+            ` : ''}
         `;
-        return item;
+        return div;
     }
 
-    function filterEmployees(term) {
-        const container = document.getElementById('employee-list');
-        const noResults = document.getElementById('no-results');
-        const query = (term || '').toLowerCase().trim();
-        let count = 0;
-
-        if (!query) {
-            // Если поиск пустой, показать все
-            Array.from(container.children).forEach(item => {
-                item.classList.remove('hidden');
-            });
-            noResults.classList.remove('show');
-            return;
-        }
-
-        Array.from(container.children).forEach((item, index) => {
-            if (!allEmployees[index]) return;
-            const emp = allEmployees[index];
-            const name = (emp.name || '').toLowerCase();
-            const region = (emp.region || '').toLowerCase();
-            const group = (emp.group || '').toLowerCase();
-            const phone = (emp.phone || '').toString().toLowerCase();
-            const text = `${name} ${region} ${group} ${phone}`;
-            
-            if (text.includes(query)) {
-                item.classList.remove('hidden');
-                count++;
-            } else {
-                item.classList.add('hidden');
-            }
-        });
-
-        if (count === 0 && query) {
-            noResults.classList.add('show');
-        } else {
-            noResults.classList.remove('show');
-        }
-    }
-
-    // Загрузка данных
+    // Загрузка
     fetch(apiUrl)
-        .then(res => {
-            if (!res.ok) {
-                throw new Error('Ошибка загрузки данных');
-            }
-            return res.json();
-        })
+        .then(r => r.json())
         .then(data => {
-            if (!Array.isArray(data)) {
-                throw new Error('Неверный формат данных');
-            }
             allEmployees = data;
-            document.getElementById('loader').style.display = 'none';
-            const container = document.getElementById('employee-list');
-            
-            if (data.length === 0) {
-                container.innerHTML = '<div style="text-align: center; padding: 50px; color: #718096;">Список сотрудников пуст</div>';
-                return;
-            }
-            
-            data.forEach((emp, index) => {
-                try {
-                    const item = createListItem(emp);
-                    item.style.animationDelay = `${index * 0.05}s`;
-                    container.appendChild(item);
-                } catch(err) {
-                    console.error('Ошибка создания элемента:', err, emp);
-                }
-            });
-            
-            // Специальная обработка для кнопок звонка в Telegram WebApp
-            container.querySelectorAll('.btn-call').forEach(link => {
-                const href = link.getAttribute('href');
-                if (!href || !href.startsWith('tel:')) return;
-                
-                // В Telegram WebApp нужно обрабатывать по-особому
-                if (isTelegram) {
-                    // Удаляем href, чтобы стандартное поведение не сработало
-                    link.removeAttribute('href');
-                    link.setAttribute('data-phone', href.replace('tel:', ''));
-                    
-                    // Функция для звонка в Telegram
-                    const makeCall = function() {
-                        const phone = link.getAttribute('data-phone');
-                        if (phone) {
-                            const telUrl = 'tel:' + phone;
-                            // Используем window.location для открытия tel: в Telegram
-                            window.location.href = telUrl;
-                            // Также пробуем создать и кликнуть по ссылке
-                            setTimeout(() => {
-                                const tempLink = document.createElement('a');
-                                tempLink.href = telUrl;
-                                tempLink.style.position = 'fixed';
-                                tempLink.style.left = '-9999px';
-                                document.body.appendChild(tempLink);
-                                tempLink.click();
-                                setTimeout(() => document.body.removeChild(tempLink), 100);
-                            }, 50);
-                        }
-                    };
-                    
-                    link.addEventListener('click', function(e) {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        makeCall();
-                        return false;
-                    });
-                    
-                    link.addEventListener('touchend', function(e) {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        makeCall();
-                        return false;
-                    }, { passive: false });
-                }
-                // В обычном браузере ссылка работает автоматически через href
-            });
+            document.getElementById('loader').classList.add('hidden');
+            const list = document.getElementById('employee-list');
+            data.forEach(e => list.appendChild(createCard(e)));
         })
-        .catch(err => {
-            console.error('Ошибка загрузки:', err);
-            const loader = document.getElementById('loader');
-            loader.innerHTML = `
-                <div style="text-align: center; color: #DF3B20;">
-                    <div style="font-size: 48px; margin-bottom: 16px;">⚠️</div>
-                    <div style="font-size: 18px; margin-bottom: 8px; font-weight: 600; color: #424B52;">Ошибка загрузки данных</div>
-                    <div style="font-size: 14px; color: #718096;">Проверьте подключение к интернету</div>
-                </div>
-            `;
+        .catch(() => {
+            document.getElementById('loader').innerHTML = 'Ошибка загрузки данных';
         });
 
-    // Инициализация поиска
-    const searchInput = document.getElementById('search-input');
-    if (searchInput) {
-        searchInput.addEventListener('input', (e) => {
-            filterEmployees(e.target.value);
+    // Поиск
+    document.getElementById('search-input').addEventListener('input', function(e) {
+        const val = e.target.value.toLowerCase();
+        const cards = document.querySelectorAll('.list-item');
+        let hasVisible = false;
+
+        cards.forEach((card, i) => {
+            const emp = allEmployees[i];
+            const text = `${emp.name} ${emp.region} ${emp.group} ${emp.phone}`.toLowerCase();
+            if (text.includes(val)) {
+                card.classList.remove('hidden');
+                hasVisible = true;
+            } else {
+                card.classList.add('hidden');
+            }
         });
-    }
-    
-    // Обработка ошибок консоли от Telegram SDK (если не в Telegram)
-    window.addEventListener('error', function(e) {
-        if (e.message && e.message.includes('telegram-web-app')) {
-            e.preventDefault();
-            return false;
-        }
+
+        document.getElementById('no-results').style.display = hasVisible ? 'none' : 'block';
     });
 </script>
 
