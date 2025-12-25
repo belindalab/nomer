@@ -268,24 +268,8 @@
                 container.appendChild(item);
             });
             
-            // Для Telegram WebApp - дополнительная обработка
-            container.querySelectorAll('.btn-call').forEach(link => {
-                link.addEventListener('click', function(e) {
-                    const href = this.getAttribute('href');
-                    
-                    // Если в Telegram, используем tg.openLink
-                    if (tg && tg.openLink) {
-                        e.preventDefault();
-                        try {
-                            tg.openLink(href);
-                        } catch(err) {
-                            // Если не работает, используем стандартное поведение
-                            window.location.href = href;
-                        }
-                    }
-                    // В обычном браузере - стандартное поведение ссылки tel: работает автоматически
-                });
-            });
+            // Ссылки tel: работают автоматически во всех браузерах и Telegram
+            // Никакой дополнительной обработки не требуется
         })
         .catch(err => {
             document.getElementById('loader').innerHTML = '<p style="color:red">Ошибка загрузки</p>';
