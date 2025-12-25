@@ -3,39 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Контакты Belinda</title>
+    <title>Контакты</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body { font-family: -apple-system, system-ui, sans-serif; background: #f0f2f5; color: #1c1e21; padding-bottom: 30px; }
-        
-        /* Шапка */
         .header { position: sticky; top: 0; background: #ffffff; padding: 15px 20px; border-bottom: 1px solid #ddd; z-index: 1000; display: flex; align-items: center; }
         .logo { height: 28px; margin-right: 12px; }
         h1 { font-size: 18px; font-weight: 700; }
-
-        /* Поиск */
         .search-container { position: sticky; top: 59px; background: #ffffff; padding: 10px 15px; z-index: 999; border-bottom: 1px solid #eee; }
         .search-box { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 8px; font-size: 16px; outline: none; background: #f9f9f9; }
-        .search-box:focus { border-color: #DF3B20; background: #fff; }
-
-        /* Список карточек */
         .container { padding: 10px; }
         .card { background: #fff; border-radius: 12px; padding: 15px; margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
         .info { flex: 1; min-width: 0; }
-        .name { font-size: 16px; font-weight: 700; color: #222; margin-bottom: 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .name { font-size: 16px; font-weight: 700; color: #222; margin-bottom: 4px; }
         .sub { font-size: 13px; color: #666; }
-
-        /* Кнопка звонка */
-        .btn-call { 
-            width: 48px; height: 48px; background: #DF3B20; border: none; border-radius: 10px; 
-            display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0;
-        }
+        .btn-call { width: 48px; height: 48px; background: #DF3B20; border: none; border-radius: 10px; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; }
         .btn-call svg { width: 22px; height: 22px; fill: white; }
-        .btn-call:active { transform: scale(0.9); opacity: 0.8; }
-
-        /* Индикатор загрузки */
         .loader { text-align: center; padding: 50px; color: #666; }
         .hidden { display: none !important; }
     </style>
@@ -48,7 +32,7 @@
 </div>
 
 <div class="search-container">
-    <input type="text" id="search-input" class="search-box" placeholder="Поиск сотрудника...">
+    <input type="text" id="search-input" class="search-box" placeholder="Поиск...">
 </div>
 
 <div id="loader" class="loader">Загрузка данных...</div>
@@ -59,48 +43,41 @@
     tg.ready();
     tg.expand();
 
-    const API_URL = "https://script.google.com/macros/s/AKfycbzXBx0xFqWkTzdY9ZtMMix7dzewV_-46XuxiWlUUsUsQd8FJWAPOeE7Vd8jIwlWJo8c/exec";
+    const API_URL = "https://script.google.com/macros/s/AKfycbzixlhQe-pkXthvebpZBBForgsICB05v_3inXbMmDav-fc85x2zKtUbnIILeUJKH167/exec";
     let employees = [];
 
-    /**
-     * Исправленная функция звонка
-     * Использует несколько методов одновременно для обхода блокировок протокола tel:
-     */
     function makeCall(phone) {
         if (!phone) return;
         
-        // Очищаем номер: оставляем только цифры. 
-        // Если номер в Таджикистане, можно добавить + перед ним.
+        // Очищаем номер: оставляем только цифры
         let cleanPhone = phone.toString().replace(/[^\d]/g, '');
-        if (!cleanPhone.startsWith('+')) {
-            cleanPhone = '+' + cleanPhone;
+        
+        // Для Таджикистана принудительно добавляем +
+        if (!cleanPhone.startsWith('992')) {
+            cleanPhone = '992' + cleanPhone;
         }
+        const finalNumber = '+' + cleanPhone;
 
         tg.showConfirm(`Позвонить сотруднику?\n${phone}`, (ok) => {
             if (ok) {
-                console.log("Попытка звонка на: " + cleanPhone);
+                // Метод 1: Скрытая ссылка с атрибутом target="_top" (решает проблему iOS)
+                const a = document.createElement('a');
+                a.href = 'tel:' + finalNumber;
+                a.target = '_top'; 
+                document.body.appendChild(a);
+                a.click();
                 
-                // МЕТОД 1: Скрытая ссылка (самый эффективный для iOS/Android WebView)
-                const link = document.createElement('a');
-                link.href = 'tel:' + cleanPhone;
-                link.style.display = 'none';
-                document.body.appendChild(link);
-                link.click();
-                
-                // Даем небольшую задержку перед удалением
+                // Метод 2: Нативный метод Telegram SDK
                 setTimeout(() => {
-                    document.body.removeChild(link);
+                    tg.openLink('tel:' + finalNumber);
                 }, 100);
 
-                // МЕТОД 2: Прямой переход через Location (резервный)
-                setTimeout(() => {
-                    window.location.href = 'tel:' + cleanPhone;
-                }, 300);
+                // Удаляем ссылку через секунду
+                setTimeout(() => { document.body.removeChild(a); }, 1000);
             }
         });
     }
 
-    // Загрузка данных из Google Таблицы
     fetch(API_URL)
         .then(r => r.json())
         .then(data => {
@@ -108,12 +85,8 @@
             document.getElementById('loader').classList.add('hidden');
             render(data);
         })
-        .catch(err => {
-            console.error(err);
-            document.getElementById('loader').innerText = "Ошибка загрузки данных";
-        });
+        .catch(() => { document.getElementById('loader').innerText = "Ошибка загрузки"; });
 
-    // Отрисовка списка
     function render(items) {
         const container = document.getElementById('list');
         container.innerHTML = '';
@@ -124,7 +97,7 @@
                 <div class="info">
                     <div class="name">${emp.name}</div>
                     <div class="sub">${emp.region || ''} • ${emp.group || ''}</div>
-                    <div class="sub" style="margin-top:2px; font-weight:600; color:#DF3B20;">${emp.phone || ''}</div>
+                    <div class="sub" style="font-weight:600; color:#DF3B20;">${emp.phone || ''}</div>
                 </div>
                 ${emp.phone ? `
                     <button class="btn-call" onclick="makeCall('${emp.phone}')">
@@ -136,7 +109,6 @@
         });
     }
 
-    // Живой поиск
     document.getElementById('search-input').addEventListener('input', (e) => {
         const val = e.target.value.toLowerCase();
         const filtered = employees.filter(emp => 
@@ -145,6 +117,5 @@
         render(filtered);
     });
 </script>
-
 </body>
 </html>
