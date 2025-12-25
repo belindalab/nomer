@@ -197,15 +197,25 @@
 <script>
     // Безопасная инициализация Telegram WebApp (только если запущено в Telegram)
     let tg = null;
+    let isTelegram = false;
     try {
-        if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initData) {
+        if (window.Telegram && window.Telegram.WebApp) {
             tg = window.Telegram.WebApp;
-            tg.ready();
-            tg.expand();
+            // Проверяем, что мы действительно в Telegram
+            // В Telegram WebApp всегда есть platform или initDataUnsafe
+            if (tg.platform || (tg.initDataUnsafe && tg.initDataUnsafe.user)) {
+                isTelegram = true;
+                tg.ready();
+                tg.expand();
+            }
         }
     } catch(e) {
         // Игнорируем ошибки, если не в Telegram
-        console.log('Telegram WebApp недоступен (нормально, если открыто не в Telegram)');
+    }
+    
+    // Дополнительная проверка по user agent (на случай если Telegram SDK не определился)
+    if (!isTelegram && /Telegram/i.test(navigator.userAgent)) {
+        isTelegram = true;
     }
 
     const apiUrl = "https://script.google.com/macros/s/AKfycbzixlhQe-pkXthvebpZBBForgsICB05v_3inXbMmDav-fc85x2zKtUbnIILeUJKH167/exec";
@@ -307,6 +317,54 @@
                 } catch(err) {
                     console.error('Ошибка создания элемента:', err, emp);
                 }
+            });
+            
+            // Специальная обработка для кнопок звонка в Telegram WebApp
+            container.querySelectorAll('.btn-call').forEach(link => {
+                const href = link.getAttribute('href');
+                if (!href || !href.startsWith('tel:')) return;
+                
+                // В Telegram WebApp нужно обрабатывать по-особому
+                if (isTelegram) {
+                    // Удаляем href, чтобы стандартное поведение не сработало
+                    link.removeAttribute('href');
+                    link.setAttribute('data-phone', href.replace('tel:', ''));
+                    
+                    // Функция для звонка в Telegram
+                    const makeCall = function() {
+                        const phone = link.getAttribute('data-phone');
+                        if (phone) {
+                            const telUrl = 'tel:' + phone;
+                            // Используем window.location для открытия tel: в Telegram
+                            window.location.href = telUrl;
+                            // Также пробуем создать и кликнуть по ссылке
+                            setTimeout(() => {
+                                const tempLink = document.createElement('a');
+                                tempLink.href = telUrl;
+                                tempLink.style.position = 'fixed';
+                                tempLink.style.left = '-9999px';
+                                document.body.appendChild(tempLink);
+                                tempLink.click();
+                                setTimeout(() => document.body.removeChild(tempLink), 100);
+                            }, 50);
+                        }
+                    };
+                    
+                    link.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        makeCall();
+                        return false;
+                    });
+                    
+                    link.addEventListener('touchend', function(e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        makeCall();
+                        return false;
+                    }, { passive: false });
+                }
+                // В обычном браузере ссылка работает автоматически через href
             });
         })
         .catch(err => {
