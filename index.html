@@ -195,12 +195,17 @@
 <div class="container" id="employee-list"></div>
 
 <script>
-    // Инициализация Telegram WebApp
+    // Безопасная инициализация Telegram WebApp (только если запущено в Telegram)
     let tg = null;
-    if (window.Telegram && window.Telegram.WebApp) {
-        tg = window.Telegram.WebApp;
-        tg.ready();
-        tg.expand();
+    try {
+        if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initData) {
+            tg = window.Telegram.WebApp;
+            tg.ready();
+            tg.expand();
+        }
+    } catch(e) {
+        // Игнорируем ошибки, если не в Telegram
+        console.log('Telegram WebApp недоступен (нормально, если открыто не в Telegram)');
     }
 
     const apiUrl = "https://script.google.com/macros/s/AKfycbzixlhQe-pkXthvebpZBBForgsICB05v_3inXbMmDav-fc85x2zKtUbnIILeUJKH167/exec";
@@ -237,12 +242,26 @@
     function filterEmployees(term) {
         const container = document.getElementById('employee-list');
         const noResults = document.getElementById('no-results');
-        const query = term.toLowerCase().trim();
+        const query = (term || '').toLowerCase().trim();
         let count = 0;
 
+        if (!query) {
+            // Если поиск пустой, показать все
+            Array.from(container.children).forEach(item => {
+                item.classList.remove('hidden');
+            });
+            noResults.classList.remove('show');
+            return;
+        }
+
         Array.from(container.children).forEach((item, index) => {
+            if (!allEmployees[index]) return;
             const emp = allEmployees[index];
-            const text = `${emp.name} ${emp.region} ${emp.group} ${emp.phone}`.toLowerCase();
+            const name = (emp.name || '').toLowerCase();
+            const region = (emp.region || '').toLowerCase();
+            const group = (emp.group || '').toLowerCase();
+            const phone = (emp.phone || '').toString().toLowerCase();
+            const text = `${name} ${region} ${group} ${phone}`;
             
             if (text.includes(query)) {
                 item.classList.remove('hidden');
@@ -252,31 +271,71 @@
             }
         });
 
-        count === 0 ? noResults.classList.add('show') : noResults.classList.remove('show');
+        if (count === 0 && query) {
+            noResults.classList.add('show');
+        } else {
+            noResults.classList.remove('show');
+        }
     }
 
     // Загрузка данных
     fetch(apiUrl)
-        .then(res => res.json())
+        .then(res => {
+            if (!res.ok) {
+                throw new Error('Ошибка загрузки данных');
+            }
+            return res.json();
+        })
         .then(data => {
+            if (!Array.isArray(data)) {
+                throw new Error('Неверный формат данных');
+            }
             allEmployees = data;
             document.getElementById('loader').style.display = 'none';
             const container = document.getElementById('employee-list');
-            data.forEach((emp, index) => {
-                const item = createListItem(emp);
-                item.style.animationDelay = `${index * 0.05}s`;
-                container.appendChild(item);
-            });
             
-            // Ссылки tel: работают автоматически во всех браузерах и Telegram
-            // Никакой дополнительной обработки не требуется
+            if (data.length === 0) {
+                container.innerHTML = '<div style="text-align: center; padding: 50px; color: #718096;">Список сотрудников пуст</div>';
+                return;
+            }
+            
+            data.forEach((emp, index) => {
+                try {
+                    const item = createListItem(emp);
+                    item.style.animationDelay = `${index * 0.05}s`;
+                    container.appendChild(item);
+                } catch(err) {
+                    console.error('Ошибка создания элемента:', err, emp);
+                }
+            });
         })
         .catch(err => {
-            document.getElementById('loader').innerHTML = '<p style="color:red">Ошибка загрузки</p>';
-            console.error(err);
+            console.error('Ошибка загрузки:', err);
+            const loader = document.getElementById('loader');
+            loader.innerHTML = `
+                <div style="text-align: center; color: #DF3B20;">
+                    <div style="font-size: 48px; margin-bottom: 16px;">⚠️</div>
+                    <div style="font-size: 18px; margin-bottom: 8px; font-weight: 600; color: #424B52;">Ошибка загрузки данных</div>
+                    <div style="font-size: 14px; color: #718096;">Проверьте подключение к интернету</div>
+                </div>
+            `;
         });
 
-    document.getElementById('search-input').addEventListener('input', (e) => filterEmployees(e.target.value));
+    // Инициализация поиска
+    const searchInput = document.getElementById('search-input');
+    if (searchInput) {
+        searchInput.addEventListener('input', (e) => {
+            filterEmployees(e.target.value);
+        });
+    }
+    
+    // Обработка ошибок консоли от Telegram SDK (если не в Telegram)
+    window.addEventListener('error', function(e) {
+        if (e.message && e.message.includes('telegram-web-app')) {
+            e.preventDefault();
+            return false;
+        }
+    });
 </script>
 
 </body>
