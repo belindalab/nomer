@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Номера сотрудников</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         * {
             margin: 0;
@@ -40,23 +41,18 @@
             margin: 0 auto;
         }
 
-        .header-title {
-            flex: 1;
-            text-align: center;
-        }
-
         .logo {
             height: 36px;
             width: auto;
-            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
         }
 
         h1 {
             font-size: 24px;
             font-weight: 700;
             color: #424B52;
-            letter-spacing: -0.5px;
             margin: 0;
+            flex: 1;
+            text-align: center;
         }
 
         .search-container {
@@ -78,21 +74,14 @@
             border-radius: 8px;
             background: #f9f9f9;
             font-size: 15px;
-            color: #424B52;
             outline: none;
             transition: all 0.3s ease;
-            -webkit-appearance: none;
-            appearance: none;
         }
 
         .search-box:focus {
             border-color: #DF3B20;
             background: white;
             box-shadow: 0 0 0 3px rgba(223, 59, 32, 0.1);
-        }
-
-        .search-box::placeholder {
-            color: #a0aec0;
         }
 
         .container {
@@ -108,48 +97,27 @@
             padding: 18px 20px;
             border-radius: 12px;
             box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-            transition: all 0.3s ease;
-            animation: slideInUp 0.4s ease forwards;
-            opacity: 0;
-            transform: translateY(20px);
-            position: relative;
-            border: 1px solid #f0f0f0;
-        }
-
-        .list-item:hover {
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
-        }
-
-        .list-item.hidden {
-            display: none;
-        }
-
-        @keyframes slideInUp {
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .item-main {
             display: flex;
             align-items: center;
             justify-content: space-between;
             gap: 20px;
-            position: relative;
+            border: 1px solid #f0f0f0;
+            animation: slideInUp 0.4s ease forwards;
         }
 
-        .item-content {
-            flex: 1;
-            min-width: 0;
+        .list-item.hidden { display: none; }
+
+        @keyframes slideInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
+
+        .item-content { flex: 1; min-width: 0; }
 
         .item-name {
             font-size: 18px;
             font-weight: 700;
             color: #424B52;
-            letter-spacing: -0.3px;
-            line-height: 1.4;
             margin-bottom: 8px;
         }
 
@@ -160,21 +128,13 @@
             flex-wrap: wrap;
             font-size: 14px;
             color: #718096;
-            line-height: 1.5;
         }
 
-        .item-info-compact span {
-            display: inline;
-        }
-
-        .item-info-compact .info-dot {
-            display: inline-block;
+        .info-dot {
             width: 3px;
             height: 3px;
             background: #999;
             border-radius: 50%;
-            margin: 0 6px;
-            vertical-align: middle;
         }
 
         .btn-call {
@@ -186,301 +146,131 @@
             background: #DF3B20;
             color: white;
             border-radius: 12px;
-            text-decoration: none;
-            transition: all 0.2s ease;
-            flex-shrink: 0;
             box-shadow: 0 2px 6px rgba(223, 59, 32, 0.3);
             cursor: pointer;
-            -webkit-tap-highlight-color: rgba(223, 59, 32, 0.2);
             border: none;
-            outline: none;
-            position: relative;
-            -webkit-user-select: none;
-            user-select: none;
+            flex-shrink: 0;
         }
 
-        .btn-call:active {
-            transform: scale(0.95);
-            background: #c6341a;
-        }
+        .btn-call:active { transform: scale(0.9); }
 
-        .btn-call svg {
-            width: 20px;
-            height: 20px;
-            fill: white;
-            pointer-events: none;
-        }
+        .btn-call svg { width: 20px; height: 20px; fill: white; }
 
-        .loader {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 120px 20px;
-            color: #424B52;
-        }
-
+        .loader { text-align: center; padding: 120px 20px; }
         .spinner {
-            width: 50px;
-            height: 50px;
-            border: 4px solid rgba(66, 75, 82, 0.2);
-            border-top-color: #DF3B20;
+            width: 40px; height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #DF3B20;
             border-radius: 50%;
-            animation: spin 0.9s cubic-bezier(0.5, 0, 0.5, 1) infinite;
-            margin-bottom: 24px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
         }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        .loader-text {
-            font-size: 16px;
-            color: #424B52;
-            font-weight: 500;
-            letter-spacing: 0.3px;
-        }
-
-        .no-results {
-            text-align: center;
-            padding: 120px 20px;
-            color: #718096;
-            font-size: 16px;
-            display: none;
-            font-weight: 500;
-        }
-
-        .no-results.show {
-            display: block;
-            animation: fadeIn 0.4s ease;
-        }
-
-        @keyframes fadeIn {
-            from { 
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to { 
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        @media (max-width: 480px) {
-            .header {
-                padding: 16px;
-            }
-
-            .header-content {
-                gap: 12px;
-            }
-
-            .logo {
-                height: 28px;
-            }
-
-            h1 {
-                font-size: 20px;
-            }
-
-            .search-container {
-                padding: 16px;
-                top: 68px;
-            }
-
-            .search-box {
-                padding: 12px 16px;
-                font-size: 15px;
-            }
-
-            .container {
-                padding: 16px;
-            }
-
-            .list-item {
-                padding: 16px;
-                margin-bottom: 10px;
-            }
-
-            .item-name {
-                font-size: 17px;
-            }
-
-            .item-info-compact {
-                font-size: 13px;
-                gap: 6px;
-            }
-
-            .btn-call {
-                width: 44px;
-                height: 44px;
-            }
-
-            .btn-call svg {
-                width: 18px;
-                height: 18px;
-            }
-        }
+        .no-results { text-align: center; padding: 50px; display: none; color: #718096; }
+        .no-results.show { display: block; }
     </style>
 </head>
 <body>
-    <div class="header">
-        <div class="header-content">
-            <img src="https://belinda.tj/img/main-logo.svg" alt="Logo" class="logo">
-            <div class="header-title">
-                <h1>Номера сотрудников</h1>
-            </div>
-        </div>
+
+<div class="header">
+    <div class="header-content">
+        <img src="https://belinda.tj/img/main-logo.svg" alt="Logo" class="logo">
+        <h1>Номера сотрудников</h1>
     </div>
+</div>
 
-    <div class="search-container">
-        <input type="text" id="search-input" class="search-box" placeholder="🔍 Поиск сотрудников...">
-    </div>
+<div class="search-container">
+    <input type="text" id="search-input" class="search-box" placeholder="🔍 Поиск сотрудников...">
+</div>
 
-    <div id="loader" class="loader">
-        <div class="spinner"></div>
-        <div class="loader-text">Загрузка...</div>
-    </div>
+<div id="loader" class="loader">
+    <div class="spinner"></div>
+    <p>Загрузка данных...</p>
+</div>
 
-    <div class="no-results" id="no-results">
-        Ничего не найдено
-    </div>
+<div id="no-results" class="no-results">Ничего не найдено</div>
+<div class="container" id="employee-list"></div>
 
-    <div class="container" id="employee-list"></div>
+<script>
+    // Инициализация Telegram WebApp
+    const tg = window.Telegram.WebApp;
+    tg.ready();
+    tg.expand();
 
-    <script>
-        const apiUrl = "https://script.google.com/macros/s/AKfycbzixlhQe-pkXthvebpZBBForgsICB05v_3inXbMmDav-fc85x2zKtUbnIILeUJKH167/exec";
+    const apiUrl = "https://script.google.com/macros/s/AKfycbzixlhQe-pkXthvebpZBBForgsICB05v_3inXbMmDav-fc85x2zKtUbnIILeUJKH167/exec";
+    let allEmployees = [];
+
+    // Функция для звонка (специально для Telegram)
+    function makeCall(phone) {
+        if (!phone) return;
+        const cleanPhone = phone.toString().replace(/[^\d+]/g, '');
+        // Используем метод Telegram SDK для открытия ссылок
+        tg.openLink(`tel:${cleanPhone}`);
+    }
+
+    function createListItem(emp) {
+        const item = document.createElement('div');
+        item.className = 'list-item';
         
-        let allEmployees = [];
+        const infoItems = [];
+        if (emp.region) infoItems.push(`<span>${emp.region}</span>`);
+        if (emp.group) infoItems.push(`<span>${emp.group}</span>`);
+        if (emp.phone) infoItems.push(`<span>${emp.phone}</span>`);
 
-        function filterEmployees(searchTerm) {
-            const container = document.getElementById('employee-list');
-            const noResults = document.getElementById('no-results');
-            const term = (searchTerm || '').toLowerCase().trim();
-            let visibleCount = 0;
+        const callBtn = emp.phone ? `
+            <button class="btn-call" onclick="makeCall('${emp.phone}')">
+                <svg viewBox="0 0 24 24"><path d="M20.01 15.38c-1.23 0-2.42-.2-3.53-.56-.35-.12-.74-.03-1.01.24l-1.57 1.97c-2.83-1.35-5.48-3.9-6.89-6.83l1.95-1.66c.27-.28.35-.67.24-1.02-.37-1.11-.56-2.3-.56-3.53 0-.54-.45-.99-.99-.99H4.19C3.65 3 3 3.24 3 3.99 3 13.28 10.73 21 20.01 21c.71 0 .99-.63.99-1.18v-3.45c0-.54-.45-.99-.99-.99z"/></svg>
+            </button>` : '';
 
-            if (!term) {
-                container.querySelectorAll('.list-item').forEach(item => {
-                    item.classList.remove('hidden');
-                });
-                noResults.classList.remove('show');
-                return;
-            }
-
-            allEmployees.forEach((emp, index) => {
-                const item = container.children[index];
-                if (!item) return;
-
-                const nameMatch = emp.name && emp.name.toLowerCase().includes(term);
-                const regionMatch = emp.region && emp.region.toLowerCase().includes(term);
-                const groupMatch = emp.group && emp.group.toLowerCase().includes(term);
-                const phoneMatch = emp.phone && emp.phone.toString().includes(term);
-
-                const matches = nameMatch || regionMatch || groupMatch || phoneMatch;
-
-                if (matches) {
-                    item.classList.remove('hidden');
-                    visibleCount++;
-                } else {
-                    item.classList.add('hidden');
-                }
-            });
-
-            if (visibleCount === 0 && term) {
-                noResults.classList.add('show');
-            } else {
-                noResults.classList.remove('show');
-            }
-        }
-
-        function createListItem(emp, index) {
-            const item = document.createElement('div');
-            item.className = 'list-item';
-            item.style.animationDelay = `${index * 0.05}s`;
-            
-            const infoItems = [];
-            if (emp.region) {
-                infoItems.push(`<span>${emp.region}</span>`);
-            }
-            if (emp.group) {
-                infoItems.push(`<span>${emp.group}</span>`);
-            }
-            if (emp.phone) {
-                infoItems.push(`<span>${emp.phone}</span>`);
-            }
-
-            const phoneNumber = emp.phone ? emp.phone.toString().trim() : '';
-            const callButton = phoneNumber ? `
-                <button type="button" class="btn-call" onclick="window.location.href='tel:${phoneNumber.replace(/[^\d+]/g, '')}'">
-                    <svg viewBox="0 0 24 24">
-                        <path d="M20.01 15.38c-1.23 0-2.42-.2-3.53-.56-.35-.12-.74-.03-1.01.24l-1.57 1.97c-2.83-1.35-5.48-3.9-6.89-6.83l1.95-1.66c.27-.28.35-.67.24-1.02-.37-1.11-.56-2.3-.56-3.53 0-.54-.45-.99-.99-.99H4.19C3.65 3 3 3.24 3 3.99 3 13.28 10.73 21 20.01 21c.71 0 .99-.63.99-1.18v-3.45c0-.54-.45-.99-.99-.99z"/>
-                    </svg>
-                </button>
-            ` : '';
-
-            item.innerHTML = `
-                <div class="item-main">
-                    <div class="item-content">
-                        <div class="item-name">${emp.name || 'Без имени'}</div>
-                        ${infoItems.length > 0 ? `
-                            <div class="item-info-compact">
-                                ${infoItems.map((info, i) => `
-                                    ${i > 0 ? '<span class="info-dot"></span>' : ''}
-                                    ${info}
-                                `).join('')}
-                            </div>
-                        ` : ''}
-                    </div>
-                    ${callButton}
+        item.innerHTML = `
+            <div class="item-content">
+                <div class="item-name">${emp.name || 'Без имени'}</div>
+                <div class="item-info-compact">
+                    ${infoItems.join('<span class="info-dot"></span>')}
                 </div>
-            `;
+            </div>
+            ${callBtn}
+        `;
+        return item;
+    }
+
+    function filterEmployees(term) {
+        const container = document.getElementById('employee-list');
+        const noResults = document.getElementById('no-results');
+        const query = term.toLowerCase().trim();
+        let count = 0;
+
+        Array.from(container.children).forEach((item, index) => {
+            const emp = allEmployees[index];
+            const text = `${emp.name} ${emp.region} ${emp.group} ${emp.phone}`.toLowerCase();
             
-            return item;
-        }
+            if (text.includes(query)) {
+                item.classList.remove('hidden');
+                count++;
+            } else {
+                item.classList.add('hidden');
+            }
+        });
 
-        fetch(apiUrl)
-            .then(response => response.json())
-            .then(data => {
-                document.getElementById('loader').style.display = 'none';
-                const container = document.getElementById('employee-list');
-                
-                allEmployees = data;
-                
-                data.forEach((emp, index) => {
-                    const item = createListItem(emp, index);
-                    container.appendChild(item);
-                });
+        count === 0 ? noResults.classList.add('show') : noResults.classList.remove('show');
+    }
 
-                // Дополнительная обработка для кнопок звонка
-                container.querySelectorAll('.btn-call').forEach(btn => {
-                    btn.addEventListener('touchend', function(e) {
-                        e.preventDefault();
-                        const phone = this.getAttribute('onclick');
-                        if (phone) {
-                            const match = phone.match(/tel:([^\']+)/);
-                            if (match && match[1]) {
-                                window.location.href = 'tel:' + match[1];
-                            }
-                        }
-                    });
-                });
+    // Загрузка данных
+    fetch(apiUrl)
+        .then(res => res.json())
+        .then(data => {
+            allEmployees = data;
+            document.getElementById('loader').style.display = 'none';
+            const container = document.getElementById('employee-list');
+            data.forEach(emp => container.appendChild(createListItem(emp)));
+        })
+        .catch(err => {
+            document.getElementById('loader').innerHTML = '<p style="color:red">Ошибка загрузки</p>';
+        });
 
-                const searchInput = document.getElementById('search-input');
-                searchInput.addEventListener('input', (e) => {
-                    filterEmployees(e.target.value);
-                });
-            })
-            .catch(err => {
-                document.getElementById('loader').innerHTML = `
-                    <div style="text-align: center; color: #DF3B20;">
-                        <div style="font-size: 48px; margin-bottom: 16px;">⚠️</div>
-                        <div style="font-size: 18px; margin-bottom: 8px; font-weight: 600; color: #424B52;">Ошибка загрузки</div>
-                        <div style="font-size: 14px; color: #718096;">Проверьте подключение к интернету</div>
-                    </div>
-                `;
-                console.error(err);
-            });
-    </script>
+    document.getElementById('search-input').addEventListener('input', (e) => filterEmployees(e.target.value));
+</script>
+
 </body>
 </html>
