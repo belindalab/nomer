@@ -194,19 +194,34 @@
 
 <script>
     // Инициализация Telegram WebApp
-    const tg = window.Telegram.WebApp;
-    tg.ready();
-    tg.expand();
+    let tg = null;
+    if (window.Telegram && window.Telegram.WebApp) {
+        tg = window.Telegram.WebApp;
+        tg.ready();
+        tg.expand();
+    }
 
     const apiUrl = "https://script.google.com/macros/s/AKfycbzixlhQe-pkXthvebpZBBForgsICB05v_3inXbMmDav-fc85x2zKtUbnIILeUJKH167/exec";
     let allEmployees = [];
 
-    // Функция для звонка (специально для Telegram)
+    // Функция для звонка - работает везде
     function makeCall(phone) {
         if (!phone) return;
-        const cleanPhone = phone.toString().replace(/[^\d+]/g, '');
-        // Используем метод Telegram SDK для открытия ссылок
-        tg.openLink(`tel:${cleanPhone}`);
+        const cleanPhone = phone.toString().trim().replace(/[^\d+]/g, '');
+        const telUrl = 'tel:' + cleanPhone;
+        
+        // Пробуем открыть через Telegram, если доступен
+        if (tg && tg.openLink) {
+            try {
+                tg.openLink(telUrl);
+                return;
+            } catch(e) {
+                // Если не работает, используем стандартный способ
+            }
+        }
+        
+        // Стандартный способ - работает везде
+        window.location.href = telUrl;
     }
 
     function createListItem(emp) {
@@ -218,8 +233,9 @@
         if (emp.group) infoItems.push(`<span>${emp.group}</span>`);
         if (emp.phone) infoItems.push(`<span>${emp.phone}</span>`);
 
-        const callBtn = emp.phone ? `
-            <button class="btn-call" onclick="makeCall('${emp.phone}')">
+        const phoneNumber = emp.phone ? emp.phone.toString().trim() : '';
+        const callBtn = phoneNumber ? `
+            <button type="button" class="btn-call" onclick="makeCall('${phoneNumber.replace(/'/g, "\\'")}')">
                 <svg viewBox="0 0 24 24"><path d="M20.01 15.38c-1.23 0-2.42-.2-3.53-.56-.35-.12-.74-.03-1.01.24l-1.57 1.97c-2.83-1.35-5.48-3.9-6.89-6.83l1.95-1.66c.27-.28.35-.67.24-1.02-.37-1.11-.56-2.3-.56-3.53 0-.54-.45-.99-.99-.99H4.19C3.65 3 3 3.24 3 3.99 3 13.28 10.73 21 20.01 21c.71 0 .99-.63.99-1.18v-3.45c0-.54-.45-.99-.99-.99z"/></svg>
             </button>` : '';
 
@@ -263,10 +279,40 @@
             allEmployees = data;
             document.getElementById('loader').style.display = 'none';
             const container = document.getElementById('employee-list');
-            data.forEach(emp => container.appendChild(createListItem(emp)));
+            data.forEach((emp, index) => {
+                const item = createListItem(emp);
+                item.style.animationDelay = `${index * 0.05}s`;
+                container.appendChild(item);
+            });
+            
+            // Дополнительно добавляем обработчики через addEventListener для надежности
+            container.querySelectorAll('.btn-call').forEach(btn => {
+                const onclick = btn.getAttribute('onclick');
+                if (onclick) {
+                    btn.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        const phoneMatch = onclick.match(/makeCall\('([^']+)'\)/);
+                        if (phoneMatch && phoneMatch[1]) {
+                            makeCall(phoneMatch[1]);
+                        }
+                    });
+                    
+                    // Для мобильных устройств
+                    btn.addEventListener('touchend', function(e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        const phoneMatch = onclick.match(/makeCall\('([^']+)'\)/);
+                        if (phoneMatch && phoneMatch[1]) {
+                            makeCall(phoneMatch[1]);
+                        }
+                    });
+                }
+            });
         })
         .catch(err => {
             document.getElementById('loader').innerHTML = '<p style="color:red">Ошибка загрузки</p>';
+            console.error(err);
         });
 
     document.getElementById('search-input').addEventListener('input', (e) => filterEmployees(e.target.value));
